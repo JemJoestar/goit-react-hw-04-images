@@ -1,42 +1,39 @@
 import css from "./ImageFinder.module.css"
-import { Component } from 'react';
+import { useState } from 'react';
 
-export class SearchBar extends Component {
-  state = {
-    currentRequest: '',
-  };
-  handleChange = event => {
-    this.setState({ currentRequest: event.currentTarget.value });
-  };
+export const SearchBar = ({onSubmit}) => {
+  const [currentRequest, setCurrentRequest] = useState('')
 
-  render() {
-    return (
-      <header className={css.header}>
-        <form
-          className={css.form}
-          onSubmit={event => {
-            this.props.onSubmit({
-              event,
-              searchReq: this.state.currentRequest,
-            });
-            this.setState({currentRequest: ""});
-          }}
-        >
-          <button type="submit" className={css.searchBtn}>
-            <span className="button-label">&#128269;</span>
-          </button>
-
-          <input
-            className={css.searchBar}
-            type="text"
-            autoComplete="off"
-            autoFocus
-            value={this.state.currentRequest}
-            onChange={this.handleChange}
-            placeholder="Search images and photos"
-          />
-        </form>
-      </header>
-    );
+  const handleChange = event =>{
+    setCurrentRequest(event.currentTarget.value)
   }
+
+  return (
+    <header className={css.header}>
+      <form
+        className={css.form}
+        onSubmit={event => {
+          onSubmit({
+            event,
+            searchReq: currentRequest,
+          });
+          setCurrentRequest('')
+        }}
+      >
+        <button type="submit" className={css.searchBtn}>
+          <span className="button-label">&#128269;</span>
+        </button>
+
+        <input
+          className={css.searchBar}
+          type="text"
+          autoComplete="off"
+          autoFocus
+          value={currentRequest}
+          onChange={handleChange}
+          placeholder="Search images and photos"
+        />
+      </form>
+    </header>
+  );
 }

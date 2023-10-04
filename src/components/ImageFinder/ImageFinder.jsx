@@ -1,106 +1,107 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { SearchBar } from './SearchBar';
 import { axiosPixabeyFetch } from 'components/Api/PixabeyApi';
 import { SeeMoreBtn } from './SeeMoreBtn';
 import * as basicLightbox from 'basiclightbox';
 import { Modal } from './Modal/Modal';
 import { PhotoList } from './PhotoList';
-import css from "./ImageFinder.module.css"
+import css from './ImageFinder.module.css';
 
-export class ImageFinder extends Component {
-  state = {
-    photos: null,
-    currentRequest: '',
-    page: 1,
-    renderSeeMoreBtn: false,
-    totalHits: null,
-    modalControls: null
-  };
+export const ImageFinder = () => {
+  const [photos, setPhotos] = useState(null);
+  const [currentRequest, setCurrentRequest] = useState('');
+  const [page, setPage] = useState(1);
+  const [renderSeeMoreBtn, setSeeMoreBtn] = useState(false);
+  const [canRenderPhotos, setCanRenderPhotos] = useState(false);
+  const [totalHits, setTotalHits] = useState(null);
+  const [modalControls, setModalControls] = useState(null);
 
-  newRequest = ({ event, searchReq }) => {
+  const newRequest = ({ event, searchReq }) => {
     event.preventDefault();
-    if(searchReq === ""){
-      return
+    if (searchReq === '') {
+      return;
     }
-    this.setState({ currentRequest: searchReq });
+    setCurrentRequest(searchReq);
   };
 
-  loadPhotos = async () => {
-    const newData = await axiosPixabeyFetch(
-      this.state.currentRequest,
-      this.state.page
-    );
-    this.setState({ totalHits: newData.totalHits });
+  const loadPhotos = async () => {
+    const newData = await axiosPixabeyFetch(currentRequest, page);
+    console.log(`page:`, page);
+    setTotalHits(newData.totalHits);
     const newPhotos = newData.hits;
-    this.addNewPhotosToState(newPhotos);
+    addNewPhotosToState(newPhotos);
   };
 
-  addNewPhotosToState = newPhotos => {
-    this.setState({
-      photos: [...(this.state.photos ?? []), ...newPhotos],
-      page: this.state.page + 1,
-    });
+  const addNewPhotosToState = newPhotos => {
+    setPhotos(prevState => [...(prevState ?? []), ...newPhotos]);
+    setPage(prevState => prevState + 1);
+    console.log(newPhotos);
   };
 
-  handleClick = ({event, bigImgUrl}) =>{
-    const modal = basicLightbox.create(Modal({bigImgUrl}))
-    this.setState({modalControls: modal})
-    modal.show()
-    document.querySelector(".modal").addEventListener("click", this.closeModalByClick)
-    window.addEventListener("keydown", this.closeModalByEsc)
-  }
+  const handleClick = async ({ event, bigImgUrl }) => {
+    const modal = basicLightbox.create(Modal({ bigImgUrl }));
 
-  closeModalByClick = (event) =>{
-    if(event.target === event.currentTarget){
-      this.closeModal()
-    }
-  } 
+    modal.show();
+    setModalControls(modal);
 
-  closeModalByEsc = (event) => {
-    if(event.key === "Escape"){
-      this.closeModal()
-    }
-  }
+    document
+      .querySelector('.modal')
+      .addEventListener('click', closeModalByClick);
+    window.addEventListener('keydown', closeModalByEsc);
+  };
 
-  closeModal = () => {
-      this.state.modalControls.close()
-      this.setState({modalControls: null})
-      document.querySelector(".modal").removeEventListener("click", this.closeModal)
-      window.removeEventListener("keydown", this.closeModalByEsc)
-  }
-  
-
-  componentDidUpdate = (_, prevState) => {
-    if (prevState.currentRequest !== this.state.currentRequest) {
-      console.log(12)
-      this.setState({ photos: null, page: 1 });
-      this.loadPhotos();
-    }
-    if (
-      this.state.page > 1 &&
-      this.state.totalHits / 12 > this.state.page &&
-      this.state.renderSeeMoreBtn !== true
-    ) {
-      this.setState({ renderSeeMoreBtn: true });
-    } else if (
-      this.state.renderSeeMoreBtn === true &&
-      this.state.totalHits / 12 < this.state.page
-    ) {
-      this.setState({ renderSeeMoreBtn: false });
+  const closeModalByClick = event => {
+    if (event.target === event.currentTarget) {
+      closeModal();
     }
   };
 
-  render() {
-    const canRanderPhotos =
-      Array.isArray(this.state.photos) && this.state.photos.length !== 0;
-    return (
-      <div className={css.container}>
-        <SearchBar onSubmit={this.newRequest} />
-        {canRanderPhotos && <PhotoList photos={this.state.photos} onClick={this.handleClick}/>}
-        {this.state.renderSeeMoreBtn && (
-          <SeeMoreBtn onSeeMore={this.loadPhotos} />
-        )}
-      </div>
-    );
-  }
-}
+  const closeModalByEsc = event => {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  };
+
+  const closeModal = () => {
+    setModalControls(prevState => {
+      prevState.close()
+      return null
+    })
+    document.querySelector('.modal').removeEventListener('click', closeModal);
+    window.removeEventListener('keydown', closeModalByEsc);
+  };
+
+  useEffect(() => {
+    async function setVal() {
+      if (currentRequest !== '') {
+        setPhotos(null);
+        setPage(1);
+        loadPhotos();
+      }
+    }
+    setVal();
+  }, [currentRequest]);
+
+
+  useEffect(() => {
+    if ((photos ?? []).length > 0) {
+      setCanRenderPhotos(true);
+    }
+  }, [photos]);
+
+  useEffect(() => {
+    if (page > 1 && totalHits / 12 > page && renderSeeMoreBtn !== true) {
+      setSeeMoreBtn(true);
+    } else if (renderSeeMoreBtn === true && totalHits / 12 < page) {
+      setSeeMoreBtn(false);
+    }
+  }, [photos, page]);
+
+  return (
+    <div className={css.container}>
+      <SearchBar onSubmit={newRequest} />
+      {canRenderPhotos && <PhotoList photos={photos} onClick={handleClick} />}
+      {renderSeeMoreBtn && <SeeMoreBtn onSeeMore={loadPhotos} />}
+    </div>
+  );
+};
