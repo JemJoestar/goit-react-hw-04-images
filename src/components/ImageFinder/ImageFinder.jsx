@@ -43,6 +43,7 @@ export const ImageFinder = () => {
 
     modal.show();
     setModalControls(modal);
+    console.log(modalControls)
 
     document
       .querySelector('.modal')
@@ -80,7 +81,7 @@ export const ImageFinder = () => {
       }
     }
     setVal();
-  }, [currentRequest]);
+  }, [currentRequest,loadPhotos]);
 
 
   useEffect(() => {
@@ -95,7 +96,7 @@ export const ImageFinder = () => {
     } else if (renderSeeMoreBtn === true && totalHits / 12 < page) {
       setSeeMoreBtn(false);
     }
-  }, [photos, page]);
+  }, [photos, page, renderSeeMoreBtn, totalHits]);
 
   return (
     <div className={css.container}>
