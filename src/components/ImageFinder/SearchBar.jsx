@@ -19,7 +19,7 @@ export const SearchBar = ({onSubmit}) => {
           });
           setCurrentRequest('')
         }}
-      >
+      > 
         <button type="submit" className={css.searchBtn}>
           <span className="button-label">&#128269;</span>
         </button>
