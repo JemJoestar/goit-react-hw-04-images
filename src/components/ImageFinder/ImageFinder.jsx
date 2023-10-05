@@ -24,14 +24,23 @@ export const ImageFinder = () => {
     setCurrentRequest(searchReq);
   };
 
-  
-  const loadPhotos = useCallback(async () => {
-    const newData = await axiosPixabeyFetch(currentRequest, page);
-    console.log(`page:`, page);
-    setTotalHits(newData.totalHits);
-    const newPhotos = newData.hits;
-    addNewPhotosToState(newPhotos);
-  }, [currentRequest, page])
+  // const loadPhotos = async () => {
+  //   const newData = await axiosPixabeyFetch(currentRequest, page);
+  //   console.log(`page:`, page);
+  //   setTotalHits(newData.totalHits);
+  //   const newPhotos = newData.hits;
+  //   addNewPhotosToState(newPhotos);
+  // }
+  const loadPhotos = useCallback(
+    async currentPage => {
+      const newData = await axiosPixabeyFetch(currentRequest, currentPage);
+      console.log(`page:`, currentPage);
+      setTotalHits(newData.totalHits);
+      const newPhotos = newData.hits;
+      addNewPhotosToState(newPhotos);
+    },
+    [currentRequest]
+  );
 
   const addNewPhotosToState = newPhotos => {
     setPhotos(prevState => [...(prevState ?? []), ...newPhotos]);
@@ -73,16 +82,17 @@ export const ImageFinder = () => {
     window.removeEventListener('keydown', closeModalByEsc);
   };
 
+  const loadPhotosByClickSeeMore = () =>{
+    loadPhotos(page)
+  }
+
   useEffect(() => {
-    async function setVal() {
-      if (currentRequest !== '') {
-        setPhotos(null);
-        setPage(1);
-        loadPhotos();
-      }
+    if (currentRequest !== '') {
+      setPhotos(null);
+      setPage(1);
+      loadPhotos(1);
     }
-    setVal();
-  }, [photos, currentRequest, loadPhotos]);
+  }, [currentRequest, loadPhotos]);
 
   useEffect(() => {
     if ((photos ?? []).length > 0) {
@@ -102,7 +112,7 @@ export const ImageFinder = () => {
     <div className={css.container}>
       <SearchBar onSubmit={newRequest} />
       {canRenderPhotos && <PhotoList photos={photos} onClick={handleClick} />}
-      {renderSeeMoreBtn && <SeeMoreBtn onSeeMore={loadPhotos} />}
+      {renderSeeMoreBtn && <SeeMoreBtn onSeeMore={loadPhotosByClickSeeMore} />}
     </div>
   );
 };
