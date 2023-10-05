@@ -81,7 +81,7 @@ export const ImageFinder = () => {
       }
     }
     setVal();
-  }, [currentRequest]);
+  }, [currentRequest, totalHits, page]);
 
 
   useEffect(() => {
