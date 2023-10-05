@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/JemJoestar/goit-react-hw-04-images/static/css/main.dbbad492.css",
+    "main.js": "/JemJoestar/goit-react-hw-04-images/static/js/main.09d74536.js",
+    "index.html": "/JemJoestar/goit-react-hw-04-images/index.html",
+    "main.dbbad492.css.map": "/JemJoestar/goit-react-hw-04-images/static/css/main.dbbad492.css.map",
+    "main.09d74536.js.map": "/JemJoestar/goit-react-hw-04-images/static/js/main.09d74536.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.dbbad492.css",
+    "static/js/main.09d74536.js"
+  ]
+}
