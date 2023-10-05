@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { SearchBar } from './SearchBar';
 import { axiosPixabeyFetch } from 'components/Api/PixabeyApi';
 import { SeeMoreBtn } from './SeeMoreBtn';
@@ -24,13 +24,14 @@ export const ImageFinder = () => {
     setCurrentRequest(searchReq);
   };
 
-  const loadPhotos = async () => {
+  
+  const loadPhotos = useCallback(async () => {
     const newData = await axiosPixabeyFetch(currentRequest, page);
     console.log(`page:`, page);
     setTotalHits(newData.totalHits);
     const newPhotos = newData.hits;
     addNewPhotosToState(newPhotos);
-  };
+  }, [currentRequest, page])
 
   const addNewPhotosToState = newPhotos => {
     setPhotos(prevState => [...(prevState ?? []), ...newPhotos]);
@@ -43,7 +44,7 @@ export const ImageFinder = () => {
 
     modal.show();
     setModalControls(modal);
-    console.log(modalControls)
+    console.log(modalControls);
 
     document
       .querySelector('.modal')
@@ -65,9 +66,9 @@ export const ImageFinder = () => {
 
   const closeModal = () => {
     setModalControls(prevState => {
-      prevState.close()
-      return null
-    })
+      prevState.close();
+      return null;
+    });
     document.querySelector('.modal').removeEventListener('click', closeModal);
     window.removeEventListener('keydown', closeModalByEsc);
   };
@@ -81,8 +82,7 @@ export const ImageFinder = () => {
       }
     }
     setVal();
-  }, [currentRequest, totalHits, page]);
-
+  }, [photos, currentRequest, loadPhotos]);
 
   useEffect(() => {
     if ((photos ?? []).length > 0) {
